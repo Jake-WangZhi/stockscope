@@ -1,10 +1,12 @@
+# Database Design
+
 ## UML Diagram
 
 ![UML_Diagram](./images/UML_Diagram.png)
 
 ## Entities
 
-### 1. UserInfo
+#### 1. UserInfo
 
 This is an entity regarding each user and their login information.
 
@@ -24,7 +26,7 @@ This entity is designed with the following assumptions:
 4. The users are allowed to login through their Google SSO, requiring their email to be unique
 
 
-### 2. ConversionRate
+#### 2. ConversionRate
 
 This is an entity regarding converting user-selected currency into US dollars.
 
@@ -39,7 +41,7 @@ This entity is designed with the following assumptions:
 2. One user could only selected one specific currency
 
 
-### 3. StockMetadata
+#### 3. StockMetadata
 
 This is an entity regarding each stock and its necessary information.
 
@@ -54,7 +56,7 @@ This entity is designed with the following assumptions:
 2. A single stock can only correspond to one company
 3. A single stock can only correspond to one country’s market
 
-### 4. StockPrice
+#### 4. StockPrice
 
 This is an entity designed to store the price information for stocks.
 
@@ -71,7 +73,7 @@ This entity is designed with the following assumptions:
 2. This entity is a weak entity as it needs to use StockId, borrowed from the StockMetadata entity, to uniquely identify each record (per the reason specified above).
 
 
-### 5. MarketMetadata
+#### 5. MarketMetadata
 
 This is an entity to store the necessary information for different country’s stock market.
 
@@ -85,22 +87,22 @@ This entity is designed with the following assumptions:
 
 ## Relations
 
-### 1. Favorites
+**1. Favorites**
 
 - "Favorites" is a many-to-many relationship between `UserInfo` and `StockMetadata`.  Users can add their favorite stocks to their collections.
 - Assumption: Each user can have multiple favorite stocks, and a stock can be marked as a favorite by many users.
 
-### 2. Prefer
+**2. Prefer**
 
 - "Prefer" is a one-to-many relationship between `ConversionRate` and `UserInfo`. Users have their own preferences about currency
 - Assumption: Each user only has one preferred currency. However, a currency can be preferred by many users.
 
-### 3. Details
+**3. Details**
 
 - "Details" is a one-to-many relationship between `StockMetadata` and `StockPrice`. A stock may have different prices per day.
 - Assumption: Each stock could have different prices at different dates. However, a stock price at a certain date only pertains to one stock.
 
-### 4. Belong
+**4. Belong**
 
 - "Belong" is a one-to-many relationship between `MarketMetadata` and `StockMetadata`. Each stock belongs to one market.
 - Assumption: Each stock can only belong to one market. However, a market can include multiple different stocks.
@@ -111,29 +113,28 @@ Functional dependencies are vital to our application as they are intuitive relat
 
 ### Functional dependencies on each table:
 
-#### 1. UserInfo
+**1. UserInfo**
 
-- `UserId` -> `CurrencyId, FirstName, LastName, DisplayName, Email, CreatedAt, UpdatedAt`
+- `UserId` -> `CurrencyId`, `FirstName`, `LastName`, `DisplayName`, `Email`, `CreatedAt`, `UpdatedAt`
 - `Email` -> `UserId`
 
-#### 2. ConversionRate
+**2. ConversionRate**
 
-- `CurrencyId` -> `CurrencyName, Date, AmountPerUSD`
+- `CurrencyId` -> `CurrencyName`, `Date`, `AmountPerUSD`
 - `CurrencyName` -> `CurrencyId`
 
-#### 3. StockMetadata
+**3. StockMetadata**
 
-- `StockId` -> `MarketId, Name, Company, Industry`
+- `StockId` -> `MarketId`, `Name`, `Company`, `Industry`
 - `Company` -> `StockId`
-- `Name, Market` -> `StockId`
+- `Name`, `Market` -> `StockId`
 
-#### 4. StockPrice
+**4. StockPrice**
+- `StockId`, `Date` -> `High`, `Low`, `OpeningPrice`, `ClosingPrice`, `Volume`
 
-- `StockId, Date` -> `High, Low, OpeningPrice, ClosingPrice, Volume`
+**5. MarketMetadata**
 
-#### 5. MarketMetadata
-
-- `MarketId` -> `MarketName, Description`
+- `MarketId` -> `MarketName`, `Description`
 - `MarketName` -> `MarketId`
 - `Description` -> `MarketId`
 
@@ -145,7 +146,7 @@ For all tables, all non-attributes are dependent on its candidate key. All other
 
 Here we will convert the database design into tables (5 entities, 1 relationship)
 
-### 1. UserInfo
+**1. UserInfo**
 ```sql
 UserInfo (
     UserId INT [PK]
@@ -159,7 +160,7 @@ UserInfo (
 )
 ```
 
-### 2. ConversionRate
+**2. ConversionRate**
 ```sql
 ConversionRate (
     CurrencyId INT [PK]
@@ -168,7 +169,7 @@ ConversionRate (
     AmountPerUSD REAL
 )
 ```
-### 3. StockMetadata
+**3. StockMetadata**
 ```sql
 StockMetadata (
     StockId INT [PK]
@@ -178,7 +179,7 @@ StockMetadata (
     Industry VARCHAR(50)
 )
 ```
-### 4. StockPrice
+**4. StockPrice**
 ```sql
 StockPrice (
     Date DATE [PK]
@@ -190,7 +191,7 @@ StockPrice (
     Volume INT
 )
 ```
-### 5. MarketMetadata
+**5. MarketMetadata**
 ```sql
 MarketMetadata (
     MarketId INT [PK]
@@ -198,7 +199,7 @@ MarketMetadata (
     Description VARCHAR(255)
 )
 ```
-### 6. Favorites
+**6. Favorites**
 ```sql
 Favorites (
 	UserId INT [PK][FK to UserInfo.userId]

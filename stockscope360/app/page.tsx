@@ -3,7 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { SignInButton } from "@/components/SignInButton";
 import { DisplayNameSection } from "@/components/DisplayNameSection";
-import StockDataGrid from '@/components/stockDataGrid';
+import StockDataGrid from "@/components/StockDataGrid";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -38,7 +38,7 @@ export default function Home() {
           Plot
         </div>
         <div className="flex w-1/2 h-[480px] justify-center">
-          <StockDataGrid />
+          <StockDataGrid session={session} />
         </div>
       </div>
     </main>

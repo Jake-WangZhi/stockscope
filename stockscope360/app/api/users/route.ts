@@ -9,9 +9,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const db = await pool.getConnection();
-    const query = email
-      ? `CALL SelectUserInfoByEmail('${email}');`
-      : "CALL GetUserInfo();";
+    const query = `CALL SelectUserInfoByEmail('${email}');`;
 
     const [rows] = await db.execute<RowDataPacket[]>(query, [email]);
     db.release();

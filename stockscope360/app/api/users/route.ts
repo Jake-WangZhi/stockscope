@@ -60,12 +60,16 @@ export async function PUT(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const newUserArgs: NewUserArgs = await request.json();
 
-  const { name, email } = newUserArgs;
+  const { name, email, currency } = newUserArgs;
 
   try {
     const db = await pool.getConnection();
-    const query = `CALL UpdateUserDisplayName('${email}','${name}');`;
+    const query = currency ?
+      `CALL UpdateUserCurrency('${email}', ${currency == "USD" ? null : `'${currency}'`});`
+     :  `CALL UpdateUserDisplayName('${email}','${name}');`;
+    
     await db.execute(query);
+
     db.release();
 
     return NextResponse.json("Success");

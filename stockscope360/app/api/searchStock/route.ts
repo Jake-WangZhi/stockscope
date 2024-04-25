@@ -7,21 +7,27 @@ export interface StockId {
   StockId: number;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { stockQuery: string; marketName: string } }
-) {
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const stockQuery = searchParams.get("stockQuery");
+  const industry = searchParams.get("industry");
   const marketName = searchParams.get("marketName");
+  const currency = searchParams.get("currency");
   const email = searchParams.get("email");
 
   try {
     const db = await pool.getConnection();
-    const query1 = `CALL SearchStock ("${stockQuery}", "${marketName}")`;
+    let query1 = ``;
+    if (stockQuery && !industry) {
+      query1 = `CALL SearchStockPreferredCurrency ("${stockQuery}", "${marketName}", "${currency}")`;
+    }
+    if (!stockQuery && industry) {
+      query1 = `CALL SearchIndustryPreferredCurrency ("${industry}", "${marketName}", "${currency}")`;
+    }
     const [rows] = await db.execute<RowDataPacket[]>(query1, [
       stockQuery,
       marketName,
+      currency,
     ]);
 
     const stockTableInfo = rows[0] as StockTableInfo[];

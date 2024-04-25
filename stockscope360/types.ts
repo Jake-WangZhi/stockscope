@@ -1,6 +1,6 @@
 export interface UserInfo {
   UserId: number;
-  CurrencyId: number;
+  CurrencyName: string;
   FirstName: string;
   LastName: string;
   DisplayName: string;
@@ -17,9 +17,14 @@ export interface StockTableInfo {
   AvgPrice: number;
 }
 
+export interface IndustryInfo {
+  Industry: string;
+}
+
 export interface NewUserArgs {
   name: string;
   email: string;
+  currency?: string;
 }
 
 export interface EditFavoritesArgs {

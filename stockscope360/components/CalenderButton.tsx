@@ -4,27 +4,51 @@ import { Box } from '@mui/system';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useDateContext } from '@/context/DateContext';
 
 export default function CalendarButton() {
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs('2019-01-02'));
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs('2026-07-01'));
+  const { dates, setDates } = useDateContext();
+
+  const handleStartDateChange = (newValue: Dayjs | null) => {
+    if (newValue) {
+      if (dates.endDate && newValue.isAfter(dates.endDate)) {
+        throw new Error("Start date cannot be after end date");
+      } else {
+        setDates(prevDates => ({ ...prevDates, startDate: newValue }));
+      }
+    } else {
+      throw new Error("Date cannot be null");
+    }
+  };
+
+  const handleEndDateChange = (newValue: Dayjs | null) => {
+    if (newValue) {
+      if (dates.startDate && newValue.isBefore(dates.startDate)) {
+        throw new Error("End date cannot be before start date");
+      } else {
+        setDates(prevDates => ({ ...prevDates, endDate: newValue }));
+      }
+    } else {
+      throw new Error("Date cannot be null");
+    }
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box marginTop= '30px' marginLeft='10px' display="flex" flexDirection="row" gap={2}>
+      <Box sx={{ marginTop: '80px', marginLeft: '10px', display: "flex", flexDirection: "row", gap: 2 }}>
         <DatePicker
-          label="display start date"
-          value={startDate}
+          label="Display Start Date"
+          value={dates.startDate}
           minDate={dayjs('2019-01-02')}
           maxDate={dayjs('2026-07-01')}
-          onChange={(newValue) => setStartDate(newValue)}
+          onChange={handleStartDateChange}
         />
         <DatePicker
-          label="display end date"
-          value={endDate}
+          label="Display End Date"
+          value={dates.endDate}
           minDate={dayjs('2019-01-02')}
           maxDate={dayjs('2026-07-01')}
-          onChange={(newValue) => setEndDate(newValue)}
+          onChange={handleEndDateChange}
         />
       </Box>
     </LocalizationProvider>

@@ -5,6 +5,8 @@ import { SignInButton } from "@/components/SignInButton";
 import { DisplayNameSection } from "@/components/DisplayNameSection";
 import StockDataGrid from '@/components/stockDataGrid';
 import CalendarButton from "@/components/CalenderButton";
+import DefaultAndFavoriteToggle from "@/components/DefaultFavoriteToggle";
+import { DateProvider } from '@/context/DateContext';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -42,7 +44,14 @@ export default function Home() {
           <StockDataGrid session={session} />
         </div>
       </div>
-      <CalendarButton />
+      <DateProvider>
+        <div>
+          <CalendarButton />
+          {session?.user?.email && (
+            <DefaultAndFavoriteToggle email={session.user.email} />
+          )}
+        </div>
+      </DateProvider>
     </main>
   );
 }

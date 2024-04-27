@@ -6,7 +6,7 @@ import {
   MenuItem,
   TextField,
   Popover,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useStockInfo } from "@/hooks/useStock";
 import { useStockMetaInfo } from "@/hooks/useStockMetaInfo";
@@ -17,12 +17,14 @@ import { Session } from "next-auth";
 import { useFavoritesMutation } from "@/hooks/useFavoritesMutation";
 import { useUserInfoMutation } from "@/hooks/useUserMutation";
 import { UseMutationResult } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useIndustryInfo } from "@/hooks/useIndustry";
+import AddToDefaultButton from "@/components/AddToDefaultButton";
 
 type Props = {
   session: Session | null;
+  setIsStockIdsChanged: Dispatch<SetStateAction<boolean>>;
 };
 
 function createColumns({
@@ -103,7 +105,10 @@ function createColumns({
   return columns;
 }
 
-export default function StockDataGrid({ session }: Props) {
+export default function StockDataGrid({
+  session,
+  setIsStockIdsChanged,
+}: Props) {
   const [stockQuery, setStockQuery] = useState<string>(" ");
   const [industry, setIndustry] = useState<string>("");
   const [searchType, setSearchType] = useState<string>("Name");
@@ -172,9 +177,12 @@ export default function StockDataGrid({ session }: Props) {
     },
   });
 
-  const [anchorEl, setAnchorEl] = useState<EventTarget & Element | null>(null);
+  const [anchorEl, setAnchorEl] = useState<(EventTarget & Element) | null>(
+    null
+  );
   const [selectedRow, setSelectedRow] = useState(null);
-  const { stockMetaInfo, stockMetaInfo_isLoading, stockMetaInfo_isError } = useStockMetaInfo({ stockId: selectedRow });
+  const { stockMetaInfo, stockMetaInfo_isLoading, stockMetaInfo_isError } =
+    useStockMetaInfo({ stockId: selectedRow });
 
   const dataGridRef = useRef(null);
 
@@ -287,36 +295,36 @@ export default function StockDataGrid({ session }: Props) {
             )}
           </Box>
 
-      <Box sx={{ height: 400, width: "100%", padding: 2 }}>
-        {stockTableInfo ? (
-          <DataGrid
-            rows={stockTableInfo}
-            columns={createColumns({
-              email: session?.user?.email || "",
-              postFavoritesMutation: postFavoritesMutation,
-            })}
-            getRowId={(row) => row.StockId}
-            ref={dataGridRef}
-            onRowClick={handleRowClick}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
-            pageSizeOptions={[5, 10, 25]}
-            disableRowSelectionOnClick
-            sx={{
-              "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
-                outline: "none !important",
-              },
-            }}
-          />
-        ) : (
-          <CircularProgress />
-        )}
-      </Box>
+          <Box sx={{ height: 400, width: "100%", padding: 2 }}>
+            {stockTableInfo ? (
+              <DataGrid
+                rows={stockTableInfo}
+                columns={createColumns({
+                  email: session?.user?.email || "",
+                  postFavoritesMutation: postFavoritesMutation,
+                })}
+                getRowId={(row) => row.StockId}
+                ref={dataGridRef}
+                onRowClick={handleRowClick}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25]}
+                disableRowSelectionOnClick
+                sx={{
+                  "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+                    outline: "none !important",
+                  },
+                }}
+              />
+            ) : (
+              <CircularProgress />
+            )}
+          </Box>
         </Box>
       ) : (
         <CircularProgress />
@@ -326,12 +334,12 @@ export default function StockDataGrid({ session }: Props) {
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'center',
-          horizontal: 'center',
+          vertical: "center",
+          horizontal: "center",
         }}
         transformOrigin={{
-          vertical: 'center',
-          horizontal: 'center',
+          vertical: "center",
+          horizontal: "center",
         }}
       >
         <Box p={2}>
@@ -341,11 +349,19 @@ export default function StockDataGrid({ session }: Props) {
           ) : stockMetaInfo_isError ? (
             <Typography>Error loading info</Typography>
           ) : (
-            <Typography>
-              Name: {stockMetaInfo?.Name} <br />
-              Company: {stockMetaInfo?.Company} <br />
-              Industry: {stockMetaInfo?.Industry}
-            </Typography>
+            <>
+              <Typography>
+                Name: {stockMetaInfo?.Name} <br />
+                Company: {stockMetaInfo?.Company} <br />
+                Industry: {stockMetaInfo?.Industry}
+              </Typography>
+              {selectedRow && (
+                <AddToDefaultButton
+                  stockId={selectedRow}
+                  setIsStockIdsChanged={setIsStockIdsChanged}
+                />
+              )}
+            </>
           )}
         </Box>
       </Popover>

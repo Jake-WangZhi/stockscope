@@ -3,13 +3,15 @@ import { Grid, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { SignInButton } from "@/components/SignInButton";
 import { DisplayNameSection } from "@/components/DisplayNameSection";
-import StockDataGrid from '@/components/stockDataGrid';
+import StockDataGrid from "@/components/StockDataGrid";
 import CalendarButton from "@/components/CalenderButton";
 import DefaultAndFavoriteToggle from "@/components/DefaultFavoriteToggle";
-import { DateProvider } from '@/context/DateContext';
+import { DateProvider } from "@/context/DateContext";
+import { useState } from "react";
 
 export default function Home() {
   const { data: session } = useSession();
+  const [isStockIdsChanged, setIsStockIdsChanged] = useState(false);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gray-400">
@@ -41,14 +43,21 @@ export default function Home() {
           Plot
         </div>
         <div className="flex w-1/2 h-[480px] justify-center">
-          <StockDataGrid session={session} />
+          <StockDataGrid
+            session={session}
+            setIsStockIdsChanged={setIsStockIdsChanged}
+          />
         </div>
       </div>
       <DateProvider>
         <div>
           <CalendarButton />
           {session?.user?.email && (
-            <DefaultAndFavoriteToggle email={session.user.email} />
+            <DefaultAndFavoriteToggle
+              email={session.user.email}
+              isStockIdsChanged={isStockIdsChanged}
+              setIsStockIdsChanged={setIsStockIdsChanged}
+            />
           )}
         </div>
       </DateProvider>

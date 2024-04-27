@@ -32,6 +32,13 @@ export interface EditFavoritesArgs {
   stockId: number;
   isFavorite: boolean;
 }
+
+export interface StockMetaInfo {
+  Name: string;
+  Company: string;
+  Industry: string;
+}
+
 export interface StockDisplayInfo {
   StockId: number;
   StockName: string;

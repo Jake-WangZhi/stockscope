@@ -5,17 +5,19 @@ import {
   IconButton,
   MenuItem,
   TextField,
-  Typography,
+  Popover,
+  Typography
 } from "@mui/material";
 import { useStockInfo } from "@/hooks/useStock";
-import { EditFavoritesArgs, StockTableInfo } from "@/types";
+import { useStockMetaInfo } from "@/hooks/useStockMetaInfo";
+import { EditFavoritesArgs, StockTableInfo, StockMetaInfo } from "@/types";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { Session } from "next-auth";
 import { useFavoritesMutation } from "@/hooks/useFavoritesMutation";
 import { useUserInfoMutation } from "@/hooks/useUserMutation";
 import { UseMutationResult } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useIndustryInfo } from "@/hooks/useIndustry";
 
@@ -46,7 +48,8 @@ function createColumns({
         const isFavorite = param.row.IsFavorite;
         const stockId = param.row.StockId;
 
-        const handleClick = () => {
+        const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+          event.stopPropagation(); // Prevent pop over when clicking favroite icon
           postFavoritesMutation.mutate({
             email: email,
             stockId: stockId,
@@ -169,6 +172,21 @@ export default function StockDataGrid({ session }: Props) {
     },
   });
 
+  const [anchorEl, setAnchorEl] = useState<EventTarget & Element | null>(null);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const { stockMetaInfo, stockMetaInfo_isLoading, stockMetaInfo_isError } = useStockMetaInfo({ stockId: selectedRow });
+
+  const dataGridRef = useRef(null);
+
+  const handleRowClick = (params: any, event: React.MouseEvent) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(params.row.StockId);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box sx={{ height: 400, width: "100%" }}>
       {!isUserLoading && !industryInfoIsLoading ? (
@@ -269,38 +287,68 @@ export default function StockDataGrid({ session }: Props) {
             )}
           </Box>
 
-          <Box sx={{ height: 400, width: "100%", padding: 2 }}>
-            {stockTableInfo ? (
-              <DataGrid
-                rows={stockTableInfo}
-                columns={createColumns({
-                  email: session?.user?.email || "",
-                  postFavoritesMutation: postFavoritesMutation,
-                })}
-                getRowId={(row) => row.StockId}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 5,
-                    },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 25]}
-                disableRowSelectionOnClick
-                sx={{
-                  "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
-                    outline: "none !important",
-                  },
-                }}
-              />
-            ) : (
-              <CircularProgress />
-            )}
-          </Box>
+      <Box sx={{ height: 400, width: "100%", padding: 2 }}>
+        {stockTableInfo ? (
+          <DataGrid
+            rows={stockTableInfo}
+            columns={createColumns({
+              email: session?.user?.email || "",
+              postFavoritesMutation: postFavoritesMutation,
+            })}
+            getRowId={(row) => row.StockId}
+            ref={dataGridRef}
+            onRowClick={handleRowClick}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
+                },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25]}
+            disableRowSelectionOnClick
+            sx={{
+              "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+                outline: "none !important",
+              },
+            }}
+          />
+        ) : (
+          <CircularProgress />
+        )}
+      </Box>
         </Box>
       ) : (
         <CircularProgress />
       )}
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'center',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'center',
+          horizontal: 'center',
+        }}
+      >
+        <Box p={2}>
+          <Typography variant="h6">Stock Details</Typography>
+          {stockMetaInfo_isLoading ? (
+            <Typography>Loading...</Typography>
+          ) : stockMetaInfo_isError ? (
+            <Typography>Error loading info</Typography>
+          ) : (
+            <Typography>
+              Name: {stockMetaInfo?.Name} <br />
+              Company: {stockMetaInfo?.Company} <br />
+              Industry: {stockMetaInfo?.Industry}
+            </Typography>
+          )}
+        </Box>
+      </Popover>
     </Box>
   );
 }

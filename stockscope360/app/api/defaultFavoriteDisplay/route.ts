@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
   const start_date = searchParams.get("start_date");
   const end_date = searchParams.get("end_date");
   const email = searchParams.get("email");
-  const stockIds = searchParams.getAll("stockIds");
+  const stockIdsString = searchParams.get("stockIds");
+  const stockIds = stockIdsString ? stockIdsString.split(",") : [];
 
   if (stockIds.length == 0 && !email) return NextResponse.json("No Stock Ids");
 

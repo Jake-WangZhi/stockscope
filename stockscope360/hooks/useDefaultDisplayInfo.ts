@@ -17,9 +17,9 @@ export const useDefaultDisplayInfo = ({
     queryKey: ["defaultDisplayInfo", start_date, end_date, stockIds],
     queryFn: () =>
       fetcher(
-        `/api/defaultFavoriteDisplay?start_date=${start_date}&end_date=${end_date}&${stockIds
-          .map((id) => `stockIds=${id}`)
-          .join("&")}`
+        `/api/defaultFavoriteDisplay?start_date=${start_date}&end_date=${end_date}&stockIds=${stockIds.join(
+          ","
+        )}`
       ),
     enabled: !!start_date && !!end_date && stockIds.length > 0,
   });

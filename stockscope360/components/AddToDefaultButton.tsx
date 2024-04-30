@@ -6,16 +6,15 @@ import React, {
   useState,
 } from "react";
 import { Button } from "@mui/material";
+import { useSettingsContext } from "@/context/SettingsContext";
 
 type Props = {
   stockId: string;
-  setIsStockIdsChanged: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function AddToDefaultButton({
-  stockId,
-  setIsStockIdsChanged,
-}: Props) {
+export default function AddToDefaultButton({ stockId }: Props) {
+  const { setIsStockIdsChanged } = useSettingsContext();
+
   const [isExist, setIsExist] = useState(false);
   const [stockIds, setStockIds] = useState(() => {
     const storedValue = localStorage.getItem("stockIds");

@@ -1,15 +1,16 @@
 import { Box, Button, IconButton, Modal, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CloseIcon from "@mui/icons-material/Close";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useUserInfoMutation } from "@/hooks/useUserMutation";
+import { useSettingsContext } from "@/context/SettingsContext";
 
 type Props = {
   displayName: string;
-  email: string;
 };
 
-export const UpdateDisplayNameModal = ({ displayName, email }: Props) => {
+export const UpdateDisplayNameModal = ({ displayName }: Props) => {
+  const { email } = useSettingsContext();
   const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState(displayName);
   const [error, setError] = useState("");

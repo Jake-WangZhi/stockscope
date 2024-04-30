@@ -10,22 +10,17 @@ import {
 } from "@mui/material";
 import { useStockInfo } from "@/hooks/useStock";
 import { useStockMetaInfo } from "@/hooks/useStockMetaInfo";
-import { EditFavoritesArgs, StockTableInfo, StockMetaInfo } from "@/types";
+import { EditFavoritesArgs, StockTableInfo } from "@/types";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { Session } from "next-auth";
 import { useFavoritesMutation } from "@/hooks/useFavoritesMutation";
 import { useUserInfoMutation } from "@/hooks/useUserMutation";
 import { UseMutationResult } from "@tanstack/react-query";
-import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useIndustryInfo } from "@/hooks/useIndustry";
 import AddToDefaultButton from "@/components/AddToDefaultButton";
-
-type Props = {
-  session: Session | null;
-  setIsStockIdsChanged: Dispatch<SetStateAction<boolean>>;
-};
+import { useSettingsContext } from "@/context/SettingsContext";
 
 function createColumns({
   email,
@@ -105,19 +100,17 @@ function createColumns({
   return columns;
 }
 
-export default function StockDataGrid({
-  session,
-  setIsStockIdsChanged,
-}: Props) {
+export default function StockDataGrid() {
+  const { setCurrency, currency, setIsFavoriteChanged, email } =
+    useSettingsContext();
   const [stockQuery, setStockQuery] = useState<string>(" ");
   const [industry, setIndustry] = useState<string>("");
   const [searchType, setSearchType] = useState<string>("Name");
   const [marketName, setMarketName] = useState<string>("USA");
-  const [currency, setCurrency] = useState<string>("USD");
   const [error, setError] = useState<string | undefined>(undefined);
 
   const { userInfo, isLoading: isUserLoading } = useUser({
-    email: session?.user?.email || "",
+    email: email,
   });
 
   useEffect(() => {
@@ -127,7 +120,7 @@ export default function StockDataGrid({
         userInfo.CurrencyName == null ? "USD" : userInfo.CurrencyName
       );
     }
-  }, [userInfo]);
+  }, [setCurrency, userInfo]);
 
   const markets = [
     { value: "USA", label: "United States of America" },
@@ -150,18 +143,15 @@ export default function StockDataGrid({
     searchType: searchType,
     marketName: marketName,
     currency: currency,
-    email: session?.user?.email || "",
+    email: email,
   });
 
-  const {
-    industryInfo,
-    isLoading: industryInfoIsLoading,
-    isError: industryInfoIsError,
-  } = useIndustryInfo();
+  const { industryInfo, isLoading: industryInfoIsLoading } = useIndustryInfo();
 
   const postFavoritesMutation = useFavoritesMutation({
     method: "POST",
     onSuccess: () => {
+      setIsFavoriteChanged(true);
       refetch();
     },
     onError: () => {},
@@ -300,7 +290,7 @@ export default function StockDataGrid({
               <DataGrid
                 rows={stockTableInfo}
                 columns={createColumns({
-                  email: session?.user?.email || "",
+                  email: email,
                   postFavoritesMutation: postFavoritesMutation,
                 })}
                 getRowId={(row) => row.StockId}
@@ -355,12 +345,7 @@ export default function StockDataGrid({
                 Company: {stockMetaInfo?.Company} <br />
                 Industry: {stockMetaInfo?.Industry}
               </Typography>
-              {selectedRow && (
-                <AddToDefaultButton
-                  stockId={selectedRow}
-                  setIsStockIdsChanged={setIsStockIdsChanged}
-                />
-              )}
+              {selectedRow && <AddToDefaultButton stockId={selectedRow} />}
             </>
           )}
         </Box>

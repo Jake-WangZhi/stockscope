@@ -1,14 +1,11 @@
+import { useSettingsContext } from "@/context/SettingsContext";
 import { useUserInfoMutation } from "@/hooks/useUserMutation";
 import { Button } from "@mui/material";
-import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
-type Props = {
-  session: Session | null;
-};
-
-export const SignInButton = ({ session }: Props) => {
+export const SignInButton = () => {
+  const { name, email } = useSettingsContext();
   const [isMutationCalled, setIsMutationCalled] = useState(false);
 
   const handleSignIn = useCallback(() => signIn("google"), []);
@@ -25,23 +22,18 @@ export const SignInButton = ({ session }: Props) => {
   });
 
   useEffect(() => {
-    if (session?.user?.name && session?.user?.email && !isMutationCalled) {
+    if (name && email && !isMutationCalled) {
       putUserInfoMutation.mutate({
-        name: session.user?.name,
-        email: session.user?.email,
+        name,
+        email,
       });
       setIsMutationCalled(true);
     }
-  }, [
-    isMutationCalled,
-    putUserInfoMutation,
-    session?.user?.email,
-    session?.user?.name,
-  ]);
+  }, [isMutationCalled, putUserInfoMutation, email, name]);
 
   return (
     <>
-      {session ? (
+      {email ? (
         <Button variant="text" onClick={handleSignOut}>
           Sign Out
         </Button>

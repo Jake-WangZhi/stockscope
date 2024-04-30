@@ -42,7 +42,31 @@ export interface StockMetaInfo {
 export interface StockDisplayInfo {
   StockId: number;
   StockName: string;
-  Year: number;
-  Month: number;
+  IntervalStart: Date;
   AvgClosingPrice: number;
+  AvgOpeningPrice: number;
+  High: number;
+  Low: number;
+  TotalVolume: number;
+}
+
+export interface ChartDataPoint {
+  x: string;
+  y: string;
+  avgOpeningPrice: string;
+  High: string;
+  Low: string;
+  totalVolume: number;
+}
+
+export interface ChartDataSet {
+  label: string;
+  data: ChartDataPoint[];
+  borderColor: string;
+  backgroundColor: string;
+}
+
+export interface ChartData {
+  labels: string[];
+  datasets: ChartDataSet[];
 }

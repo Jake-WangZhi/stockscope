@@ -2,9 +2,12 @@ import NextAuth, { SessionStrategy } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 interface AuthOptions {
-  providers: any[]; // Adjust this type as per your provider configuration
+  providers: any[];
   session: {
     strategy: SessionStrategy;
+  };
+  callbacks?: {
+    redirect: ({ baseUrl }: { baseUrl: string }) => Promise<string>;
   };
 }
 
@@ -17,6 +20,11 @@ const authOptions: AuthOptions = {
   ],
   session: {
     strategy: "jwt" as SessionStrategy,
+  },
+  callbacks: {
+    async redirect({ baseUrl }: { baseUrl: string }) {
+      return baseUrl;
+    },
   },
 };
 

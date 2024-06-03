@@ -28,9 +28,10 @@ CREATE TABLE UserInfo (
 
 ```sql
 CREATE TABLE ConversionRate (
-    CurrencyName VARCHAR(10) PRIMARY KEY,
-    Date DATE PRIMARY KEY,
-    AmountPerUSD REAL
+    CurrencyName VARCHAR(10),
+    Date DATE,
+    AmountPerUSD REAL,
+    PRIMARY KEY (CurrencyName, Date)
 );
 ```
 
